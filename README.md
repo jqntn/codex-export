@@ -18,7 +18,7 @@ This places the skill in `.agents/skills/codex-export/`. Codex will automaticall
 
 **Codex Desktop app**: click `···` on any thread → **Copy session ID** (or `⌥⌘C`)
 
-![Copy session ID from Codex Desktop](assets/copy-session-id.jpg)
+![Copy session ID from Codex Desktop](assets/copy-session-id-dark.jpg)
 
 **Codex CLI**: run `--list` to browse recent sessions and copy the ID shown below each entry.
 
