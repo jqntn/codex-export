@@ -12,14 +12,18 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 
+
 def find_rollout(session_id):
     pattern = os.path.expanduser(f"~/.codex/sessions/**/*{session_id}*.jsonl")
     matches = glob.glob(pattern, recursive=True)
     if not matches:
         # also check archived
-        pattern2 = os.path.expanduser(f"~/.codex/archived_sessions/**/*{session_id}*.jsonl")
+        pattern2 = os.path.expanduser(
+            f"~/.codex/archived_sessions/**/*{session_id}*.jsonl"
+        )
         matches = glob.glob(pattern2, recursive=True)
     return matches[0] if matches else None
+
 
 def get_text(content):
     """Extract readable text from content list."""
@@ -31,13 +35,16 @@ def get_text(content):
         if t in ("input_text", "output_text", "text"):
             text = c.get("text", "").strip()
             # skip system-injected blocks (permissions, AGENTS.md instructions)
-            if (text.startswith("<permissions instructions>")
-                    or text.startswith("# AGENTS.md instructions")
-                    or text.startswith("<environment_context>")):
+            if (
+                text.startswith("<permissions instructions>")
+                or text.startswith("# AGENTS.md instructions")
+                or text.startswith("<environment_context>")
+            ):
                 continue
             if text:
                 parts.append(text)
     return "\n\n".join(parts)
+
 
 def format_tool_call(payload):
     name = payload.get("name", "tool")
@@ -47,6 +54,7 @@ def format_tool_call(payload):
     except Exception:
         args_fmt = args
     return f"`{name}`\n```json\n{args_fmt}\n```"
+
 
 def format_tool_output(payload):
     output = payload.get("output", "")
@@ -59,10 +67,14 @@ def format_tool_output(payload):
         out_fmt = out_fmt[:2000] + "\n... (truncated)"
     return f"```\n{out_fmt}\n```"
 
+
 def export(session_id, out_path=None, brief=False):
     path = find_rollout(session_id)
     if not path:
-        print(f"ERROR: session {session_id} not found in ~/.codex/sessions/", file=sys.stderr)
+        print(
+            f"ERROR: session {session_id} not found in ~/.codex/sessions/",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     entries = []
@@ -81,7 +93,11 @@ def export(session_id, out_path=None, brief=False):
     originator = meta_p.get("originator", "")
     ts_raw = meta_p.get("timestamp", "")
     try:
-        ts = datetime.fromisoformat(ts_raw.replace("Z", "+00:00")).astimezone().strftime("%Y-%m-%d %H:%M %Z")
+        ts = (
+            datetime.fromisoformat(ts_raw.replace("Z", "+00:00"))
+            .astimezone()
+            .strftime("%Y-%m-%d %H:%M %Z")
+        )
     except Exception:
         ts = ts_raw
 
@@ -89,9 +105,12 @@ def export(session_id, out_path=None, brief=False):
     lines.append(f"# Codex Session Export\n")
     lines.append(f"- **Session ID:** `{session_id}`")
     lines.append(f"- **Time:** {ts}")
-    if originator: lines.append(f"- **Source:** {originator}")
-    if cwd: lines.append(f"- **Workspace:** `{cwd}`")
-    if model: lines.append(f"- **Model:** {model}")
+    if originator:
+        lines.append(f"- **Source:** {originator}")
+    if cwd:
+        lines.append(f"- **Workspace:** `{cwd}`")
+    if model:
+        lines.append(f"- **Model:** {model}")
     lines.append("")
     lines.append("---\n")
 
@@ -142,6 +161,7 @@ def export(session_id, out_path=None, brief=False):
         sys.stdout.reconfigure(encoding="utf-8")
         print(result)
 
+
 def list_sessions(limit=15):
     db = os.path.expanduser("~/.codex/state_5.sqlite")
     if not os.path.exists(db):
@@ -150,7 +170,7 @@ def list_sessions(limit=15):
     con = sqlite3.connect(db)
     rows = con.execute(
         "SELECT id, title, source, created_at FROM threads ORDER BY created_at DESC LIMIT ?",
-        (limit,)
+        (limit,),
     ).fetchall()
     con.close()
     print(f"{'#':<3} {'Source':<8} {'Date':<17} Title")
