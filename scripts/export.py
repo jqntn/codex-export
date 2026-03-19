@@ -66,7 +66,7 @@ def export(session_id, out_path=None, brief=False):
         sys.exit(1)
 
     entries = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
@@ -135,10 +135,11 @@ def export(session_id, out_path=None, brief=False):
     result = "\n".join(lines)
 
     if out_path:
-        with open(out_path, "w") as f:
+        with open(out_path, "w", encoding="utf-8") as f:
             f.write(result)
         print(f"Exported to: {out_path}")
     else:
+        sys.stdout.reconfigure(encoding="utf-8")
         print(result)
 
 def list_sessions(limit=15):
